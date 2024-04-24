@@ -1,6 +1,5 @@
 # Enhancing Trust and Confidence in Law Enforcement through Data Science
 
----
 ## Content
 
 1. [Brief introduction](#description)
@@ -9,7 +8,6 @@
 4. [Files Structure](#files-dev)
 5. [How To Run](#how-to-run)
 
----
 ## Description
 
 In an era where trust and confidence in law enforcement are paramount, this project delves into the realm of data science to better understand the determinants and predictors of public trust in the police, focusing on the context of the United Kingdom. Traditionally, police forces have prioritized crime detection and prevention, but there's a growing recognition that fostering trust among the public is equally critical. Through advanced data analysis and modeling techniques, this project aims to uncover insights that can inform strategies to enhance trust and confidence in law enforcement agencies.
