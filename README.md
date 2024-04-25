@@ -1,6 +1,6 @@
 # Enhancing Trust and Confidence in Law Enforcement through Data Science
 
-![Sample Image][docs/metropolitain_photo.jpeg]
+![Sample Image](https://github.com/AlexRaudvee/JBG050_Group_8/blob/main/docs/metropolitain_photo.jpeg)
 
 ## Content
 
