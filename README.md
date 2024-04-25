@@ -1,5 +1,7 @@
 # Enhancing Trust and Confidence in Law Enforcement through Data Science
 
+![Sample Image][docs/metropolitain_photo.jpeg]
+
 ## Content
 
 1. [Brief introduction](#description)
@@ -50,3 +52,6 @@ The data can be loaded via [this link](https://data.police.uk/data/) chose the p
 3. Load the retirements by using ```pip install -r requirements```
 4. Add the `data` folder in your working directory
 5. Run the `exploration.py` file
+
+
+[docs/metropolitain_photo.jpeg]: docs/metropolitain_photo.jpg
