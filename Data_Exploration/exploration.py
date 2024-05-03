@@ -12,7 +12,7 @@ sys.path.append(parent)
 from config import path_to_data
 
 # create artifacts where we save the images generated during our work
-os.makedirs('artifacts')
+# os.makedirs('artifacts')
 
 def find_month_year_folder(root_folder: str):
     # Get a list of all items in the root folder
