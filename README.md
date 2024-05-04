@@ -39,7 +39,8 @@ The data can be loaded via [this link](https://data.police.uk/data/) chose the p
 
 1. `Data_Exploration` Folder 
 
-    - `exploration.py` - file in which we provide the first step to data exploration 
+    - `exploration.py` - file in which we provide the first step to data exploration
+    - `api_.ipynb` - file in which we do the extraction of data from api. (dev file)
 
 2. `config.py` - file with configurations that should be changed in your environment. 
 3. `.gitignore` - files which are going to be ignored during your push actions
