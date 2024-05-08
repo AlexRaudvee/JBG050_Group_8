@@ -1008,3 +1008,35 @@ def download_file(url, save_dir):
         print(f"Failed to download file from {url}")
 
     return save_path
+
+
+def proportion_to_color(proportion):
+    """
+    Converts a proportion value to an RGB color.
+
+    Parameters
+    -
+    proportion (float): The proportion value to be converted to an RGB color.
+
+    Returns
+    -
+    A list of integers representing an RGB color. The list contains four elements: red (r), green (g), blue (b), and alpha (a). The alpha value is set to 50 for transparency purposes.
+
+    Examples
+    -
+    To convert a proportion value to an RGB color, you can use the following code:
+
+    ```python
+    proportion_color = proportion_to_color(0.3)
+    print(proportion_color)  # Output: [170, 255, 0, 50]
+    ```
+    """
+    if proportion < 0.5:
+        r = 255
+        g = 255 - int(255 * (0.5 - proportion) / 0.5)
+        b = 0
+    else:
+        r = 255 - int(255 * (proportion - 0.5) / 0.5) 
+        g = 255
+        b = 0
+    return [r, g, b, 50]
