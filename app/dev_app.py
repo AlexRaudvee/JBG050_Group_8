@@ -173,10 +173,10 @@ def run_app():
     # Define available dates and measures 
     available_dates = df_PAS_Borough['Date'].unique()
     available_measures = df_PAS_Borough['Measure'].unique()
-    avaliable_perceptions = df_perception['measure'].unique()
+    available_perceptions = df_perception['measure'].unique()
 
     # selectbox for selection multiple measures for line plot about perception of police
-    selected_measures_perception = st.sidebar.multiselect('Select perceptions for line plot', options=avaliable_perceptions, default=avaliable_perceptions[0])
+    selected_measures_perception = st.sidebar.multiselect('Select perceptions for line plot', options=available_perceptions, default=available_perceptions[0])
 
     # Slider for selecting date and selectbox for selecting the measure
     selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
