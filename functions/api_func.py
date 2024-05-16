@@ -2,6 +2,7 @@ import os
 import json
 import requests
 
+from typing import List
 from datetime import datetime
 from ipyleaflet import Map, Marker
 
@@ -45,7 +46,7 @@ def extract_forces(type: str = None) -> list:
 
 
 
-def extract_street_level_crimes(lat: float = None, lng: float = None, date: str = None, poly: tuple = None, crime_type: str = None) -> list:
+def extract_street_level_crimes(lat: float = None, lng: float = None, date: str = None, poly = None, crime_type: str = None) -> list:
     """
     Extracts the street-level crimes data for a specific location or custom area.
 
@@ -100,10 +101,18 @@ def extract_street_level_crimes(lat: float = None, lng: float = None, date: str 
         base_url = f"https://data.police.uk/api/crimes-street/{crime_type}?"
 
     if date == None:
-        if lat and lng != None:
+        if (lat and lng )!= None:
             url = base_url + f"lat={lat}&lng={lng}&date={current_year}-{current_month}"
         elif poly != None:
-            url = base_url + f"poly={poly[0][0]}:{poly[0][1]},{poly[1][0]}:{poly[1][1]},{poly[2][0]},{poly[2][1]}&date={current_year}-{current_month}"
+            result = []
+            for pair in poly:
+                lat, lon = pair
+                result.append(f"{lat}:{lon}")
+
+            poly_req = 'poly=' + ",".join(result)
+
+            url = base_url + f"{poly_req}&date={current_year}-{current_month}"
+
         else:
             raise ValueError(f'Specify the lat/lng, you passed {lat, lng} or poly {poly}')
     
@@ -111,74 +120,26 @@ def extract_street_level_crimes(lat: float = None, lng: float = None, date: str 
         if lat and lng != None:
             url = base_url + f"lat={lat}&lng={lng}&date={date}"
         elif poly != None:
-            url = base_url + f"poly={poly[0][0]}:{poly[0][1]},{poly[1][0]}:{poly[1][1]},{poly[2][0]}:{poly[2][1]}&date={date}"
+            result = []
+            for pair in poly:
+                lat, lon = pair
+                result.append(f"{lat}:{lon}")
+
+            poly_req = 'poly=' + ",".join(result)
+            
+            url = base_url + f"{poly_req}&date={date}"
+
         else:
             raise ValueError(f'Specify the lat/lang, you passed {lat, lng} or poly {poly}')
     else: 
         raise ValueError(f'Specify the date, you passed {date}')
    
-   
+    print(url)
     r = requests.get(url)
     list_of_dict = json.loads(r.content)
     
     return list_of_dict
 
-
-########## THIS PART IS IN DEVELOPMENT ##########
-
-
-# Global variable to store the markers
-markers = []
-
-def on_map_click(event, map_instance):
-    global markers
-    
-    if event['type'] == 'click':  # Check for left-click
-        lat, lon = event['coordinates']
-        print("Latitude:", lat)
-        print("Longitude:", lon)
-        
-        # Add marker for first three clicks
-        if len(markers) < 3:
-            marker = Marker(location=(lat, lon))
-            map_instance.add_layer(marker)
-            markers.append(marker)
-            
-            # Return None until the fourth click
-            return None
-        else:
-            to_return = markers.copy()
-            # Remove markers on the fourth click
-            for marker in markers:
-                map_instance.remove_layer(marker)
-            markers.clear()
-            
-            # Return coordinates of the first three clicks
-            return [(marker.location[0], marker.location[1]) for marker in to_return]
-            
-def create_map():
-    # Create a map centered around London
-    m = Map(center=(51.5074, -0.1278), zoom=10)
-
-    # Add a click event handler to the map
-    def click_handler(event=None, **kwargs):
-        clicked = on_map_click(kwargs, m)
-        if clicked is not None:
-            print("Clicked points:", clicked)
-
-    m.on_interaction(click_handler)
-
-    # Display the map
-    return m
-
-def choose_poly():
-
-    map_of_london = create_map()
-
-    # Display the map 
-    return map_of_london
-
-#################################################
 
 
 def extract_street_level_outcomes(location_id: int = None, lat: float = None, lng: float = None, date: str = None, poly: list = None) -> list:
