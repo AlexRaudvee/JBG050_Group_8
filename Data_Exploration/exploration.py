@@ -5,14 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # config imports
-current = os.path.dirname(os.path.realpath(__file__))
+current = os.getcwd()
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from config import path_to_data
+from config import path_to_crime_data
 
 # create artifacts where we save the images generated during our work
-# os.makedirs('artifacts')
+os.makedirs('artifacts', exist_ok=True)
 
 def find_month_year_folder(root_folder: str):
     # Get a list of all items in the root folder
@@ -58,7 +58,7 @@ def read_csv_files(root_folder: str):
     return combined_df
 
 
-data_folder = path_to_data
+data_folder = path_to_crime_data
 
 result_df = read_csv_files(data_folder)
 

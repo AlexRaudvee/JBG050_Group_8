@@ -87,7 +87,7 @@ neighbourhoods = gpd.read_file('data/neighbourhoods_boundary.geojson')
 
 # DEFINE THE FUNCTIONS 
     
-def display_map(df, date, measure):
+def display_map(df: pd.DataFrame, date: str, measure: str):
         
     # Filter data based on selected date
     filtered_data = df[(df['Measure'] == measure) & (df['Date'] == date)]
@@ -98,7 +98,7 @@ def display_map(df, date, measure):
     # create the color map 
     linear = cm.LinearColormap(["red", "yellow", "green"], vmin=min(merged_data['Proportion']), vmax=max(merged_data['Proportion']))
     # create the map
-    m = folium.Map(location=[51.5074, -0.1278], tiles="Cartodb Positron", zoom_start=10)
+    m = folium.Map(location=[51.5074, -0.1278], tiles="Cartodb Positron", zoom_start=10.5)
 
     # geojson layer for the map
     geojson_layer = folium.features.GeoJson(
@@ -115,17 +115,9 @@ def display_map(df, date, measure):
     geojson_layer.add_to(m)
 
     # define the callback 
-    st_map = st_folium(m, width=900, height=550)
 
-    # read the callbacks and return them
-    neighbourhood = ''
-    poly = ''
-    if st_map['last_active_drawing']:
-        neighbourhood = st_map['last_active_drawing']['properties']['name']
-        poly = st_map['last_active_drawing']['geometry']['coordinates']
-        borough = st_map['last_active_drawing']['properties']['borough']
+    return st_folium(m, width=1200, height=750)
 
-    return borough, neighbourhood, poly, measure
 
 def display_trend_measure_borough(borough_ = None, neighbour_ = None, measures_: List[str] = ['Understand issues'], df_ = df_PAS_Borough):
     # filter the data only for need measure and borough
@@ -167,8 +159,11 @@ def run_app():
     """
     This function is the main entry point for the application. It sets up the Streamlit dashboard and loads the necessary data.
     """
-    st.set_page_config(layout="wide")
-    st.title('TRUST AND CRIME IN LONDON')
+    st.set_page_config(layout="wide",
+                       page_title='Trust-Confidence UK',
+                       page_icon='🕵️‍♂️')
+    
+    st.title('TRUST AND CONFIDENCE IN LONDON')
 
     # Define available dates and measures 
     available_dates = df_PAS_Borough['Date'].unique()
@@ -189,11 +184,19 @@ def run_app():
 
         display_trend_perception(selected_measures_perception, df_perception)
 
-        # if map_clicked:
-        borough, neighbourhood, polygon, measure = display_map(df_PAS_Borough, selected_date, selected_measure)
+        st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
+
+        # read the callback from map and return them
+        neighbourhood = ''
+        poly = ''
+        if st_map['last_active_drawing']:
+            neighbourhood = st_map['last_active_drawing']['properties']['name']
+            poly = st_map['last_active_drawing']['geometry']['coordinates']
+            borough = st_map['last_active_drawing']['properties']['Borough']
+            measure = st_map['last_active_drawing']['properties']['Measure']
         
         display_trend_measure_borough(borough, neighbourhood, selected_measures, df_PAS_Borough)
-
+        
     except:
         pass
     
