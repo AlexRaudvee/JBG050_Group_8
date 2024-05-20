@@ -14,6 +14,9 @@ import streamlit as st
 import geopandas as gpd
 import branca.colormap as cm
 import streamlit.components.v1 as components
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import linregress
 
 # modifing the root path for imports
 current = os.path.dirname(os.path.realpath(__file__))
@@ -80,6 +83,21 @@ df_PAS_Borough['Date'] = df_PAS_Borough['Date'].apply(lambda x: x[:7])
 df_PAS_Borough['Borough'] = df_PAS_Borough['Borough'].apply(lambda x: 'Westminster' if x == 'City of Westminster' else x)
 df_PAS_Borough.loc[df_PAS_Borough['Borough'] == 'Richmond Upon Thames', 'Borough'] = 'Richmond upon Thames'
 
+# Filter data for relevant measures regarding SubQuestion 3 *Pablo
+relevant_measures = ["Listen to concerns", "Relied on to be there", "Understand issues", "Trust MPS"]
+df_relevant_mps = df_PAS_MPS[df_PAS_MPS['Measure'].isin(relevant_measures)]
+df_relevant_borough = df_PAS_Borough[df_PAS_Borough['Measure'].isin(relevant_measures)]
+
+# Pivot the data to have measures as the ccolumns
+df_mps_pivot = df_relevant_mps.pivot_table(index=["Date", "Borough"], columns="Measure", values="Proportion").reset_index()
+df_borough_pivot = df_relevant_borough.pivot_table(index=["Date", "Borough"], columns="Measure", values="Proportion").reset_index()
+numeric_columns_mps = df_mps_pivot.select_dtypes(include=['float64', 'int64']).columns
+numeric_columns_borough = df_borough_pivot.select_dtypes(include=['float64', 'int64']).columns
+
+# Correlation between Trust MPS and  the other measures
+correlation_mps = df_mps_pivot[numeric_columns_mps].corr()
+correlation_borough = df_borough_pivot[numeric_columns_borough].corr()
+
 def add_click_callback(m, merged_data):
     """Add click callback to Folium map"""
     callback = """
@@ -92,11 +110,6 @@ def add_click_callback(m, merged_data):
     """
     m.add_child(folium.ClickForMarker(popup=f''))
     m.get_root().html.add_child(folium.Element(f'<script>{callback}</script>'))
-
-
-
-
-
 
 # set the app of the dashboard
 def app_():
@@ -292,4 +305,72 @@ def app_():
         components.html(m._repr_html_(), height=500, scrolling=True)
 
         st.write("<div id='borough_output'></div>", unsafe_allow_html=True)
+
+        ################################################################################
+
+        #################### SubQuestion 3 #############################################
+
+    # Streamlit dashboard setup
+    st.title('Police Responsiveness and Trust Analysis')
+
+    st.write("Correlation matrix for MPS DataFrame:")
+    st.dataframe(correlation_mps)
+
+    st.write("Correlation matrix for Borough DataFrame:")
+    st.dataframe(correlation_borough)
+
+    # Scatter plot for visualization
+    scatter_plot_data = df_mps_pivot.dropna(subset=["Trust MPS"])
+
+    for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
+        if measure in scatter_plot_data.columns:
+            st.subheader(f"Scatter plot for Trust MPS vs {measure}")
+            
+            # Prepare data for plotting
+            scatter_data = scatter_plot_data[["Trust MPS", measure]]
+            
+            # Display the scatter plot
+            st.scatter_chart(scatter_data)
+
+    # Scatter plot with regression line using seaborn
+    for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
+        if measure in scatter_plot_data.columns:
+            st.subheader(f"Scatter plot for Trust MPS vs {measure}")
+            
+            # Plotting with seaborn
+            fig, ax = plt.subplots()
+            sns.regplot(x=scatter_plot_data[measure], y=scatter_plot_data["Trust MPS"], ax=ax)
+            ax.set_xlabel(measure)
+            ax.set_ylabel("Trust MPS")
+            st.pyplot(fig)
+
+    # Plotting filtered data
+    for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
+        if measure in filtered_data.columns:
+            st.subheader(f"Scatter plot for Trust MPS vs {measure} on {selected_date}")
+            
+            # Plotting with seaborn
+            fig, ax = plt.subplots()
+            sns.regplot(x=filtered_data[measure], y=filtered_data["Trust MPS"], ax=ax)
+            ax.set_xlabel(measure)
+            ax.set_ylabel("Trust MPS")
+            st.pyplot(fig)
+
+    # Adding statistical metrics to the plots
+    for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
+        if measure in scatter_plot_data.columns:
+            st.subheader(f"Scatter plot for Trust MPS vs {measure}")
+            
+            # Calculate regression statistics
+            slope, intercept, r_value, p_value, std_err = linregress(scatter_plot_data[measure], scatter_plot_data["Trust MPS"])
+            
+            # Plotting with seaborn
+            fig, ax = plt.subplots()
+            sns.regplot(x=scatter_plot_data[measure], y=scatter_plot_data["Trust MPS"], ax=ax)
+            ax.set_xlabel(measure)
+            ax.set_ylabel("Trust MPS")
+            ax.set_title(f"R-squared: {r_value**2:.2f}, p-value: {p_value:.2e}")
+            st.pyplot(fig)
+
+
 app_()
