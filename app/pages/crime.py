@@ -50,4 +50,11 @@ if st_map['last_active_drawing']:
     borough = st_map['last_active_drawing']['properties']['Borough']
     measure = st_map['last_active_drawing']['properties']['Measure']
 
-plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
+try:
+    plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
+except:
+    st.warning("""The application is still in developing stage,
+                and for some neighbourhoods we cannot extract 
+               the data due to limit of charaters in the request 
+               to database of the London MPS. (We are working on 
+               it right now)""")

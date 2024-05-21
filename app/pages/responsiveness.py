@@ -25,13 +25,28 @@ def plot_barchart(df: pd.DataFrame, neighbourhood):
     st.plotly_chart(fig, use_container_width=True)
 
 def plot_scatter_with_regression(df, x_col, y_col, title):
-    fig, ax = plt.subplots()
-    sns.regplot(x=df[x_col], y=df[y_col], ax=ax)
-    ax.set_xlabel(x_col)
-    ax.set_ylabel(y_col)
+    # Perform linear regression
     slope, intercept, r_value, p_value, std_err = linregress(df[x_col], df[y_col])
-    ax.set_title(f"{title}\nR-squared: {r_value**2:.2f}, p-value: {p_value:.2e}")
-    st.pyplot(fig)
+    r_squared = r_value**2
+
+    # Create the regression line
+    df['Regression'] = slope * df[x_col] + intercept
+
+    # Create scatter plot with regression line using Plotly Express
+    fig = px.scatter(df, x=x_col, y=y_col, title=title)
+    fig.add_traces(px.line(df, x=x_col, y='Regression').data)
+
+    # Update layout with R-squared and p-value
+    fig.update_layout(
+        xaxis_title=x_col,
+        yaxis_title=y_col,
+        annotations=[dict(
+            xref='paper', yref='paper', x=0.5, y=-0.2,
+            showarrow=False, text=f"R-squared: {r_squared:.2f}, p-value: {p_value:.2e}"
+        )]
+    )
+
+    st.plotly_chart(fig)
 
 def create_multi_axis_plot(df):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -93,6 +108,10 @@ def create_multi_axis_plot(df):
 
 # RUN THE APPLICATION
 
+st.set_page_config(layout="wide",
+                       page_title='Responsiveness UK',
+                       page_icon='🕵️‍♂️')
+
 st.title("Police Responsiveness and Trust Analysis")
 
 # Filter data for relevant measures regarding SubQuestion 3 *Pablo
@@ -122,38 +141,37 @@ st.dataframe(correlation_borough)
 # Scatter plot for visualization
 scatter_plot_data = df_mps_pivot.dropna(subset=["Trust MPS"])
 
-for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
-    if measure in scatter_plot_data.columns:
-        st.subheader(f"Scatter plot for Trust MPS vs {measure}")
-        scatter_data = scatter_plot_data[["Trust MPS", measure]]
-        st.scatter_chart(scatter_data)
+selected_measure = st.selectbox('Select Measure', options=["Listen to concerns", "Relied on to be there", "Understand issues"])
 
-# Scatter plot with regression line using seaborn
-for measure in ["Listen to concerns", "Relied on to be there", "Understand issues"]:
-    if measure in scatter_plot_data.columns:
-        plot_scatter_with_regression(scatter_plot_data, measure, "Trust MPS", f"Trust MPS vs {measure}")
+st.write(selected_measure)
+st.subheader(f"Scatter plot for Trust MPS vs {selected_measure}")
+scatter_data = scatter_plot_data[["Trust MPS", selected_measure]]
+scatter_plot = px.scatter(scatter_data)
+st.plotly_chart(scatter_plot)
 
-# Define available dates and measures 
-available_dates = df_PAS_Borough['Date'].unique()
-available_measures = df_PAS_Borough['Measure'].unique()
+plot_scatter_with_regression(scatter_plot_data, selected_measure, "Trust MPS", f"Trust MPS vs {selected_measure}")
 
-# Slider for selecting date and selectbox for selecting the measure
-selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
+# # Define available dates and measures 
+# available_dates = df_PAS_Borough['Date'].unique()
+# available_measures = df_PAS_Borough['Measure'].unique()
 
-st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
+# # Slider for selecting date and selectbox for selecting the measure
+# selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
+# selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
 
-# Read the callback from map and return them
-neighbourhood = ''
-poly = []
-if st_map['last_active_drawing']:
-    neighbourhood = st_map['last_active_drawing']['properties']['name']
-    poly = st_map['last_active_drawing']['geometry']['coordinates']
-    borough = st_map['last_active_drawing']['properties']['Borough']
-    measure = st_map['last_active_drawing']['properties']['Measure']
+# st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
 
-if poly:
-    plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
+# # Read the callback from map and return them
+# neighbourhood = ''
+# poly = []
+# if st_map['last_active_drawing']:
+#     neighbourhood = st_map['last_active_drawing']['properties']['name']
+#     poly = st_map['last_active_drawing']['geometry']['coordinates']
+#     borough = st_map['last_active_drawing']['properties']['Borough']
+#     measure = st_map['last_active_drawing']['properties']['Measure']
+
+# if poly:
+#     plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
 
 # Create the multi-axis plot
 multi_axis_fig = create_multi_axis_plot(df_mps_pivot)
