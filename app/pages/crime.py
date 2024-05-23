@@ -7,22 +7,25 @@ import streamlit as st
 import plotly_express as px
 
 # outer imports
-current = os.getcwd()
+current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+sys.path.append(parent) 
 
+# custom imports 
 from functions.api_func import *
 from app.home import display_map, df_PAS_Borough
 
+
 # DEFINE FUNCTIONS
 
-def plot_barchart(df: pd.DataFrame, neighbourhood):
-    fig = px.bar(df.groupby(by='category').count().reset_index()[['category','month']].rename({'month':'count'}, axis=1).sort_values(by='count', ascending=False), x='category', y='count', title=f'Crimes in {neighbourhood}')
+def plot_barchart(df: pd.DataFrame, locat: str):
+    fig = px.bar(df.groupby(by='Crime type').count().reset_index()[['Crime type','Month']].rename({'Month':'count'}, axis=1).sort_values(by='count', ascending=False), x='Crime type', y='count', title=f'Crimes in {locat}')
 
     # display the line plot
     st.plotly_chart(fig, use_container_width=True)
 
 # RUN THE APPLICATION
+
 st.set_page_config(
     page_title='Trust to Crime',
     page_icon='🔪',
@@ -43,18 +46,29 @@ st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
 
 # read the callback from map and return them
 neighbourhood = ''
-poly = ''
+poly = None
+chosen_borough_on_map = None
 if st_map['last_active_drawing']:
-    neighbourhood = st_map['last_active_drawing']['properties']['name']
-    poly = st_map['last_active_drawing']['geometry']['coordinates']
-    borough = st_map['last_active_drawing']['properties']['Borough']
-    measure = st_map['last_active_drawing']['properties']['Measure']
+    neighbourhood_on_map = st_map['last_active_drawing']['properties']['name']
+    poly_on_map = st_map['last_active_drawing']['geometry']['coordinates']
+    chosen_borough_on_map = st_map['last_active_drawing']['properties']['Borough']
+    measure_on_map = st_map['last_active_drawing']['properties']['Measure']
 
+# React on the callbacks 
 try:
-    plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
+    # load the needed dataframe 
+    df = pd.read_csv(f'data/met_data/{selected_date}/{selected_date}-metropolitan-street.csv')
+
+    #filter rows
+    result_df = df[df['LSOA name'].str[:-5] == chosen_borough_on_map]
+
+    # plot the bar chart
+    plot_barchart(df=result_df, locat=chosen_borough_on_map)
+
+# Rise an error (dev option)
 except:
     st.warning("""The application is still in developing stage,
-                and for some neighbourhoods we cannot extract 
-               the data due to limit of charaters in the request 
-               to database of the London MPS. (We are working on 
-               it right now)""")
+            and for some neighbourhoods we cannot extract 
+            the data due to limit of charaters in the request 
+            to database of the London MPS. (We are working on 
+            it right now)""")

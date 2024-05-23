@@ -15,16 +15,18 @@ import branca.colormap as cm
 import streamlit.components.v1 as components
 import plotly_express as px
 
+from typing import List
+from streamlit_folium import st_folium
+from folium.features import GeoJsonTooltip
+
 # modifying the root path for imports
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent) 
 
-from streamlit_folium import st_folium
-from typing import List
-from folium.features import GeoJsonTooltip
-from functions.api_func import download_file, proportion_to_color
+# custom imports 
 from config import DEV_EXPERIMENTAL
+from functions.api_func import download_file, proportion_to_color
 
 # LOAD THE DATA  
 
@@ -200,7 +202,5 @@ def run_app():
     except:
         pass
     
-
-
 # run the application 
 run_app()

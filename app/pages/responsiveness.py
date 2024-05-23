@@ -1,22 +1,24 @@
 # imports 
 import os
 import sys
+
 import pandas as pd
+import seaborn as sns
 import streamlit as st
 import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import seaborn as sns
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+
 from scipy.stats import linregress
+from plotly.subplots import make_subplots
 
 # outer imports
 current = os.getcwd()
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from functions.api_func import *
-from app.home import display_map, df_PAS_Borough, df_PAS_MPS
+# custom imports
+from app.home import df_PAS_Borough, df_PAS_MPS
 
 # DEFINE FUNCTIONS
 
@@ -150,28 +152,6 @@ scatter_plot = px.scatter(scatter_data)
 st.plotly_chart(scatter_plot)
 
 plot_scatter_with_regression(scatter_plot_data, selected_measure, "Trust MPS", f"Trust MPS vs {selected_measure}")
-
-# # Define available dates and measures 
-# available_dates = df_PAS_Borough['Date'].unique()
-# available_measures = df_PAS_Borough['Measure'].unique()
-
-# # Slider for selecting date and selectbox for selecting the measure
-# selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-# selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
-
-# st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
-
-# # Read the callback from map and return them
-# neighbourhood = ''
-# poly = []
-# if st_map['last_active_drawing']:
-#     neighbourhood = st_map['last_active_drawing']['properties']['name']
-#     poly = st_map['last_active_drawing']['geometry']['coordinates']
-#     borough = st_map['last_active_drawing']['properties']['Borough']
-#     measure = st_map['last_active_drawing']['properties']['Measure']
-
-# if poly:
-#     plot_barchart(df=pd.DataFrame(extract_street_level_crimes(date=selected_date, poly=poly[0])), neighbourhood=neighbourhood)
 
 # Create the multi-axis plot
 multi_axis_fig = create_multi_axis_plot(df_mps_pivot)
