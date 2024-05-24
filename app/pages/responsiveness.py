@@ -1,16 +1,21 @@
+# Set Streamlit page configuration
+import streamlit as st
+st.set_page_config(layout="wide", page_title='Responsiveness UK', page_icon='🕵️‍♂️')
+
 # imports 
 import os
 import sys
-
 import pandas as pd
 import seaborn as sns
-import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-
 from scipy.stats import linregress
 from plotly.subplots import make_subplots
+import glob
+
+# Title
+st.title("Police Responsiveness and Trust Analysis")
 
 # outer imports
 current = os.getcwd()
@@ -108,13 +113,37 @@ def create_multi_axis_plot(df):
 
     return fig
 
-# RUN THE APPLICATION
+def load_and_aggregate_data(folder_path):
+    path_pattern = os.path.join(folder_path, 'PAS_ward_level_FY_*.csv')
+    files = glob.glob(path_pattern)
+    df_list = []
+    for file in files:
+        year_data = pd.read_csv(file, low_memory=False)
+        # Extract relevant columns and year information
+        columns = ['Q62A', 'Q62TG', 'Q62TJ']
+        available_columns = [col for col in columns if col in year_data.columns]
+        year_data = year_data[available_columns]
+        if 'Q62TJ' not in available_columns:
+            year_data['Q62TJ'] = pd.NA  # Fill with NaN if Q62TJ is missing
+        year_data['Year'] = file[-11:-7]  # Extract year from filename
+        df_list.append(year_data)
+    # Combine all dataframes into one
+    df_combined = pd.concat(df_list, ignore_index=True)
+    # Convert columns to numeric, handling errors
+    df_combined[columns] = df_combined[columns].apply(pd.to_numeric, errors='coerce')
+    return df_combined
 
-st.set_page_config(layout="wide",
-                       page_title='Responsiveness UK',
-                       page_icon='🕵️‍♂️')
+def calculate_metrics(df):
+    # Example: calculate the mean of each column by year
+    df_metrics = df.groupby('Year').mean().reset_index()
+    return df_metrics
 
-st.title("Police Responsiveness and Trust Analysis")
+# Load historical PAS data
+folder_path = 'data/pas_data_ward_level'  # Change this to your folder path
+df_responsiveness = load_and_aggregate_data(folder_path)
+
+# Calculate metrics
+df_metrics = calculate_metrics(df_responsiveness)
 
 # Filter data for relevant measures regarding SubQuestion 3 *Pablo
 relevant_measures = ["Listen to concerns", "Relied on to be there", "Understand issues", "Trust MPS"]
@@ -158,3 +187,11 @@ multi_axis_fig = create_multi_axis_plot(df_mps_pivot)
 
 # Display the plot in Streamlit
 st.plotly_chart(multi_axis_fig, use_container_width=True)
+
+# Historical PAS data visualization
+st.subheader("Historical PAS Data (2015-2021)")
+
+# Line chart for each metric over the years
+for column in ['Q62A', 'Q62TG', 'Q62TJ']:
+    fig = px.line(df_metrics, x='Year', y=column, title=f'{column} Over Years', markers=True)
+    st.plotly_chart(fig)
