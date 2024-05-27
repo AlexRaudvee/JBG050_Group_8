@@ -117,7 +117,6 @@ def create_multi_axis_plot(df):
 
 def load_and_aggregate_data(folder_path):
     path_pattern = os.path.join(folder_path, 'PAS_ward_level_FY_*.csv')
-    print(f"Looking for files in: {path_pattern}")  # Debug output
     
     files = glob.glob(path_pattern)
     if not files:
@@ -125,15 +124,14 @@ def load_and_aggregate_data(folder_path):
     
     df_list = []
     for file in files:
-        print(f"Processing file: {file}")  # Debug output
+        print(f"Processing file: {file}")
         year_data = pd.read_csv(file, low_memory=False)
-        # Extract relevant columns and year information
+        # relevant columns from Documnets
         columns = ['Q62A', 'Q62TG', 'Q62TJ']
         available_columns = [col for col in columns if col in year_data.columns]
         year_data = year_data[available_columns]
         if 'Q62TJ' not in available_columns:
-            year_data['Q62TJ'] = pd.NA  # Fill with NaN if Q62TJ is missing
-        # Extract year from filename assuming 'PAS_ward_level_FY_XX_YY.csv' format
+            year_data['Q62TJ'] = pd.NA  # Fill with NaN if Q62TJ is missing cux in 20 21 theres no such column
         year_data['Year'] = f"20{file[-10:-8]}-20{file[-7:-5]}"
         df_list.append(year_data)
     
@@ -152,7 +150,7 @@ def calculate_metrics(df):
     return df_metrics
 
 # Load historical PAS data
-folder_path = '../data/pas_data_ward_level'  # Adjust path to ensure it's correct relative to current working directory
+folder_path = '../data/pas_data_ward_level'
 try:
     df_responsiveness = load_and_aggregate_data(folder_path)
 except (FileNotFoundError, ValueError) as e:
