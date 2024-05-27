@@ -1,18 +1,17 @@
-# Set Streamlit page configuration
-import streamlit as st
-st.set_page_config(layout="wide", page_title='Responsiveness UK', page_icon='🕵️‍♂️')
-
 # imports 
 import os
 import sys
 import pandas as pd
-import seaborn as sns
+import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from scipy.stats import linregress
 from plotly.subplots import make_subplots
 import glob
+
+# Set Streamlit page configuration
+# st.set_page_config(layout="wide", page_title='Responsiveness UK', page_icon='🕵️‍♂️')
 
 # Title
 st.title("Police Responsiveness and Trust Analysis")
@@ -23,7 +22,10 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 # custom imports
-from app.home import df_PAS_Borough, df_PAS_MPS
+try:
+    from app.home import df_PAS_Borough, df_PAS_MPS
+except ImportError:
+    st.error("Failed to import custom modules. Please check the import paths.")
 
 # DEFINE FUNCTIONS
 
@@ -115,9 +117,15 @@ def create_multi_axis_plot(df):
 
 def load_and_aggregate_data(folder_path):
     path_pattern = os.path.join(folder_path, 'PAS_ward_level_FY_*.csv')
+    print(f"Looking for files in: {path_pattern}")  # Debug output
+    
     files = glob.glob(path_pattern)
+    if not files:
+        raise FileNotFoundError(f"No files found in {folder_path} matching pattern 'PAS_ward_level_FY_*.csv'")
+    
     df_list = []
     for file in files:
+        print(f"Processing file: {file}")  # Debug output
         year_data = pd.read_csv(file, low_memory=False)
         # Extract relevant columns and year information
         columns = ['Q62A', 'Q62TG', 'Q62TJ']
@@ -125,8 +133,13 @@ def load_and_aggregate_data(folder_path):
         year_data = year_data[available_columns]
         if 'Q62TJ' not in available_columns:
             year_data['Q62TJ'] = pd.NA  # Fill with NaN if Q62TJ is missing
-        year_data['Year'] = file[-11:-7]  # Extract year from filename
+        # Extract year from filename assuming 'PAS_ward_level_FY_XX_YY.csv' format
+        year_data['Year'] = f"20{file[-10:-8]}-20{file[-7:-5]}"
         df_list.append(year_data)
+    
+    if not df_list:
+        raise ValueError("No dataframes were created. Please check the files and columns.")
+    
     # Combine all dataframes into one
     df_combined = pd.concat(df_list, ignore_index=True)
     # Convert columns to numeric, handling errors
@@ -134,16 +147,34 @@ def load_and_aggregate_data(folder_path):
     return df_combined
 
 def calculate_metrics(df):
-    # Example: calculate the mean of each column by year
+    # Calculate the mean of each column by year
     df_metrics = df.groupby('Year').mean().reset_index()
     return df_metrics
 
 # Load historical PAS data
-folder_path = 'data/pas_data_ward_level'  # Change this to your folder path
-df_responsiveness = load_and_aggregate_data(folder_path)
+folder_path = '../data/pas_data_ward_level'  # Adjust path to ensure it's correct relative to current working directory
+try:
+    df_responsiveness = load_and_aggregate_data(folder_path)
+except (FileNotFoundError, ValueError) as e:
+    st.error(f"Error loading data: {e}")
+else:
+    # Calculate metrics
+    df_metrics = calculate_metrics(df_responsiveness)
 
-# Calculate metrics
-df_metrics = calculate_metrics(df_responsiveness)
+    # Display the data
+    st.subheader("Aggregated PAS Data")
+    st.dataframe(df_responsiveness.head())
+
+    st.subheader("Calculated Metrics by Year")
+    st.dataframe(df_metrics)
+
+    # Historical PAS data visualization
+    st.subheader("Historical PAS Data (2015-2021)")
+
+    # Line chart for each metric over the years
+    for column in ['Q62A', 'Q62TG', 'Q62TJ']:
+        fig = px.line(df_metrics, x='Year', y=column, title=f'{column} Over Years', markers=True)
+        st.plotly_chart(fig)
 
 # Filter data for relevant measures regarding SubQuestion 3 *Pablo
 relevant_measures = ["Listen to concerns", "Relied on to be there", "Understand issues", "Trust MPS"]
@@ -187,11 +218,3 @@ multi_axis_fig = create_multi_axis_plot(df_mps_pivot)
 
 # Display the plot in Streamlit
 st.plotly_chart(multi_axis_fig, use_container_width=True)
-
-# Historical PAS data visualization
-st.subheader("Historical PAS Data (2015-2021)")
-
-# Line chart for each metric over the years
-for column in ['Q62A', 'Q62TG', 'Q62TJ']:
-    fig = px.line(df_metrics, x='Year', y=column, title=f'{column} Over Years', markers=True)
-    st.plotly_chart(fig)
