@@ -40,11 +40,11 @@ def plot_barchart(df: pd.DataFrame, locat: str):
 
 # RUN THE APPLICATION
 
-st.set_page_config(
-    page_title='Trust to Crime',
-    page_icon='🔪',
-    layout='wide'
-)
+# st.set_page_config(
+#     page_title='Trust to Crime',
+#     page_icon='🔪',
+#     layout='wide'
+# )
 
 st.title("Here is going to be the crime data")
 

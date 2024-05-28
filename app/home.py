@@ -161,9 +161,6 @@ def run_app():
     """
     This function is the main entry point for the application. It sets up the Streamlit dashboard and loads the necessary data.
     """
-    st.set_page_config(layout="wide",
-                       page_title='Trust-Confidence UK',
-                       page_icon='🕵️‍♂️')
     
     st.title('TRUST AND CONFIDENCE IN LONDON')
 
@@ -203,4 +200,10 @@ def run_app():
         pass
     
 # run the application 
+
+# set the page configs
+st.set_page_config(layout="wide",
+                    page_title='Trust-Confidence UK',
+                    page_icon='🕵️‍♂️')
+
 run_app()

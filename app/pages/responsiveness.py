@@ -126,6 +126,7 @@ def load_and_aggregate_data(folder_path):
     for file in files:
         print(f"Processing file: {file}")
         year_data = pd.read_csv(file, low_memory=False)
+
         # relevant columns from Documnets
         columns = ['Q62A', 'Q62TG', 'Q62TJ']
         available_columns = [col for col in columns if col in year_data.columns]
@@ -140,6 +141,7 @@ def load_and_aggregate_data(folder_path):
     
     # Combine all dataframes into one
     df_combined = pd.concat(df_list, ignore_index=True)
+
     # Convert columns to numeric, handling errors
     df_combined[columns] = df_combined[columns].apply(pd.to_numeric, errors='coerce')
     return df_combined
@@ -150,7 +152,7 @@ def calculate_metrics(df):
     return df_metrics
 
 # Load historical PAS data
-folder_path = '../data/pas_data_ward_level'
+folder_path = 'data/pas_data_ward_level'
 try:
     df_responsiveness = load_and_aggregate_data(folder_path)
 except (FileNotFoundError, ValueError) as e:
@@ -160,14 +162,14 @@ else:
     df_metrics = calculate_metrics(df_responsiveness)
 
     # Display the data
-    st.subheader("Aggregated PAS Data")
-    st.dataframe(df_responsiveness.head())
+    # st.subheader("Aggregated PAS Data")
+    # st.dataframe(df_responsiveness.head())
 
-    st.subheader("Calculated Metrics by Year")
-    st.dataframe(df_metrics)
+    # st.subheader("Calculated Metrics by Year")
+    # st.dataframe(df_metrics)
 
-    # Historical PAS data visualization
-    st.subheader("Historical PAS Data (2015-2021)")
+    # # Historical PAS data visualization
+    # st.subheader("Historical PAS Data (2015-2021)")
 
     # Line chart for each metric over the years
     for column in ['Q62A', 'Q62TG', 'Q62TJ']:
