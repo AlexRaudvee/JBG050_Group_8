@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'Uber Move';
+    src: url('fonts/UberMoveMedium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Uber Move';
+    src: url('fonts/UberMoveBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, div, span, a, li, input, button, select, textarea {
+    font-family: 'Uber Move', sans-serif;
+}

@@ -18,7 +18,7 @@ import plotly_express as px
 from typing import List
 from streamlit_folium import st_folium
 from folium.features import GeoJsonTooltip
-
+from st_pages import Page, show_pages, add_page_title
 # modifying the root path for imports
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -27,6 +27,17 @@ sys.path.append(parent)
 # custom imports 
 from config import DEV_EXPERIMENTAL
 from functions.api_func import download_file, proportion_to_color
+
+
+# Specify what pages should be shown in the sidebar, and what their titles 
+# and icons should be
+show_pages(
+    [
+        Page("home.py", "Home", "🏠"),
+        Page("pages/crimes.py", "Crimes", ":knife:"),
+        Page("pages/responsiveness.py", "Responsiveness", "🚔"),
+    ]
+)
 
 # LOAD THE DATA  
 
@@ -50,7 +61,6 @@ if not os.path.exists(path_to_PAS):
     path_to_PAS = download_file(url_PAS, save_directory)
 
 path_to_PAS = path_to_PAS[:-5]  # Remove ".xlsx" extension
-
 
 # take the MPS sheet from the xlsx spreadsheet
 if not os.path.exists(f"{save_directory}/PAS_T%26Cdashboard_to%20Q3%2023-24_MPS.csv"):
@@ -169,20 +179,21 @@ def run_app():
     available_measures = df_PAS_Borough['Measure'].unique()
     available_perceptions = df_perception['measure'].unique()
 
-    # selectbox for selection multiple measures for line plot about perception of police
-    selected_measures_perception = st.sidebar.multiselect('Select perceptions for line plot', options=available_perceptions, default=available_perceptions[0])
-
-    # Slider for selecting date and selectbox for selecting the measure
-    selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-    selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
-
-    # Selectbox for selecting multiple measures
-    selected_measures = st.sidebar.multiselect('Select Measures for line plot', options=available_measures, default=selected_measure)
+    # Top menu for selecting filters
+    st.sidebar.header('Filter options')
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        selected_date = st.select_slider('Select Date', options=available_dates)
+    with col2:
+        selected_measure = st.selectbox('Select Measure', options=available_measures)
+    with col3:
+        selected_measures_perception = st.multiselect('Select perceptions for line plot', options=available_perceptions, default=available_perceptions[0])
+    with col4:
+        selected_measures = st.multiselect('Select Measures for line plot', options=available_measures, default=selected_measure)
 
     try:
-
         display_trend_perception(selected_measures_perception, df_perception)
-
         st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
 
         # read the callback from map and return them
@@ -198,12 +209,69 @@ def run_app():
         
     except:
         pass
-    
+
 # run the application 
 
-# set the page configs
-st.set_page_config(layout="wide",
-                    page_title='Trust-Confidence UK',
-                    page_icon='🕵️‍♂️')
+### AESTHETIC MODS ####
+st.set_page_config(
+    page_title="Trust and Confidence in London",
+    layout="wide",
+    initial_sidebar_state="collapsed",  # Collapse the sidebar
+    page_icon='🕵️‍♂️'
+)
+
+# Apply custom CSS for improved aesthetics
+st.markdown(
+    """
+    <style>
+    /* Customizing the title font and alignment */
+    .css-18e3th9 {
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #4CAF50; /* Same as primaryColor */
+    }
+
+    /* Customizing the main content area */
+    .css-1d391kg {
+        background-color: #F5F5F5;
+        padding: 2rem;
+        border-radius: 8px;
+    }
+
+    /* Customizing the sidebar */
+    .css-1d391kg > div:nth-child(1) {
+        background-color: #FFFFFF;
+        padding: 2rem;
+        border-radius: 8px;
+    }
+
+    /* Customizing the headers */
+    .css-10trblm {
+        font-family: 'Arial', sans-serif;
+        color: #4CAF50; /* Same as primaryColor */
+    }
+
+    /* Customizing the input widgets */
+    .css-1cpxqw2 {
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Customizing the text elements */
+    .css-2trqyj {
+        color: #333333; /* Same as textColor */
+    }
+
+    /* Customizing the footers */
+    footer {
+        font-family: 'Arial', sans-serif;
+        color: #333333; /* Same as textColor */
+        text-align: center;
+        padding: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 run_app()

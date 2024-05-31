@@ -40,47 +40,7 @@ def plot_barchart(df: pd.DataFrame, locat: str):
 
 # RUN THE APPLICATION
 
-# st.set_page_config(
-#     page_title='Trust to Crime',
-#     page_icon='🔪',
-#     layout='wide'
-# )
-
-st.title("Here is going to be the crime data")
-
-# # Define available dates and measures 
-# available_dates = df_PAS_Borough['Date'].unique()
-# available_measures = df_PAS_Borough['Measure'].unique()
-
-# # Slider for selecting date and selectbox for selecting the measure
-# selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-# selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
-
-# st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
-
-# # read the callback from map and return them
-# neighbourhood = ''
-# poly = None
-# chosen_borough_on_map = None
-# if st_map['last_active_drawing']:
-#     neighbourhood_on_map = st_map['last_active_drawing']['properties']['name']
-#     poly_on_map = st_map['last_active_drawing']['geometry']['coordinates']
-#     chosen_borough_on_map = st_map['last_active_drawing']['properties']['Borough']
-#     measure_on_map = st_map['last_active_drawing']['properties']['Measure']
-
-# # React on the callbacks 
-# try:
-#     # load the needed dataframe 
-#     df = pd.read_csv(f'data/met_data/{selected_date}/{selected_date}-metropolitan-street.csv')
-
-#     #filter rows
-#     result_df = df[df['LSOA name'].str[:-5] == chosen_borough_on_map]
-
-#     # plot the bar chart
-#     plot_barchart(df=result_df, locat=chosen_borough_on_map)
-
-#     # plot the crime map
-#     plot_crime_map(df=result_df, date=selected_date, measure=chosen_borough_on_map)
+st.title("Crime Data in London")
 
 # Define available dates and measures 
 available_dates = df_PAS_Borough['Date'].unique()
@@ -129,21 +89,67 @@ else:
             fig = px.bar(crime_counts, x='Crime type', y='Count', title='Total Crime Counts by Type')
             st.plotly_chart(fig, use_container_width=True)
 
-# # Rise an error (dev option)
-# except:
-#     st.warning("""The application is still in developing stage,
-#             and for some neighbourhoods we cannot extract 
-#             the data due to limit of charaters in the request 
-#             to database of the London MPS. (We are working on 
-#             it right now)""")
+### AESTHETIC MODS ####
+st.set_page_config(
+    page_title="Crime Data in London",
+    layout="wide",
+    initial_sidebar_state="collapsed",  # Collapse the sidebar
+    page_icon='🔪'
+)
 
+# Apply custom CSS for improved aesthetics
+st.markdown(
+    """
+    <style>
+    /* Customizing the title font and alignment */
+    .css-18e3th9 {
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #4CAF50; /* Same as primaryColor */
+    }
 
+    /* Customizing the main content area */
+    .css-1d391kg {
+        background-color: #F5F5F5;
+        padding: 2rem;
+        border-radius: 8px;
+    }
 
+    /* Customizing the sidebar */
+    .css-1d391kg > div:nth-child(1) {
+        background-color: #FFFFFF;
+        padding: 2rem;
+        border-radius: 8px;
+    }
 
+    /* Customizing the headers */
+    .css-10trblm {
+        font-family: 'Arial', sans-serif;
+        color: #4CAF50; /* Same as primaryColor */
+    }
 
+    /* Customizing the input widgets */
+    .css-1cpxqw2 {
+        font-family: 'Arial', sans-serif;
+    }
 
+    /* Customizing the text elements */
+    .css-2trqyj {
+        color: #333333; /* Same as textColor */
+    }
 
-
+    /* Customizing the footers */
+    footer {
+        font-family: 'Arial', sans-serif;
+        color: #333333; /* Same as textColor */
+        text-align: center;
+        padding: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 
