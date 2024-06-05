@@ -27,13 +27,13 @@ from functions.api_func import download_file, proportion_to_color
 
 # Specify what pages should be shown in the sidebar, and what their titles 
 # and icons should be
-show_pages(
-    [
-        Page("home.py", "Home", "🏠"),
-        Page("pages/crimes.py", "Crimes", ":knife:"),
-        Page("pages/responsiveness.py", "Responsiveness", "🚔"),
-    ]
-)
+# show_pages(
+#     [
+#         Page("home.py", "Home", "🏠"),
+#         Page("pages/crimes.py", "Crimes", ":knife:"),
+#         Page("pages/responsiveness.py", "Responsiveness", "🚔"),
+#     ]
+# )
 
 # LOAD THE DATA  
 
