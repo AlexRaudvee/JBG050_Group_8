@@ -24,17 +24,6 @@ sys.path.append(parent)
 from config import DEV_EXPERIMENTAL, questions_dict
 from functions.api_func import download_file, proportion_to_color
 
-
-# Specify what pages should be shown in the sidebar, and what their titles 
-# and icons should be
-# show_pages(
-#     [
-#         Page("home.py", "Home", "🏠"),
-#         Page("pages/crimes.py", "Crimes", ":knife:"),
-#         Page("pages/responsiveness.py", "Responsiveness", "🚔"),
-#     ]
-# )
-
 # LOAD THE DATA  
 
 # we run the preprocessor such to have needed csv
@@ -85,7 +74,6 @@ df_PAS_Borough = pd.read_csv(f'data/pas_data_ward_level/pre_final.csv')
 
 # exclude the questions about the perceived crime and ethnic leaning
 df_PAS_Borough = df_PAS_Borough[~df_PAS_Borough['Measure'].isin(['NNQ135A', 'NPQ135A', 'ReNQ147'])]
-
 
 # Preprocess the data fro MPS
 df_PAS_MPS['Date'] = df_PAS_MPS['Date'].apply(lambda x: x[:4])
@@ -145,7 +133,7 @@ def display_map(df: pd.DataFrame, date: str, measure: str):
 
     # define the callback 
 
-    return st_folium(m, width=1200, height=750)
+    return st_folium(m, width=2000, height=1000)
 
 
 def display_trend_measure_borough(borough_ = None, measures_: List[str] = ['worries about crime near citizens'], df_ = df_PAS_Borough):
@@ -192,18 +180,32 @@ def run_app():
     This function is the main entry point for the application. It sets up the Streamlit dashboard and loads the necessary data.
     """
     
-    st.title('TRUST AND CONFIDENCE IN LONDON')
+    st.title('Trust & Confidence in London')
 
     # Define available dates and measures 
     available_dates = df_PAS_Borough['Date'].unique()
     available_measures = df_PAS_Borough['Measure'].unique()
 
-    # Slider for selecting date and selectbox for selecting the measure
-    selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-    selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
+    # Check if available_dates is empty
+    if len(available_dates) == 0:
+        st.error("No available dates found. Please check the data loading process.")
+        return
 
-    # Selectbox for selecting multiple measures
-    selected_measures = st.sidebar.multiselect('Select Measures for line plot', options=available_measures, default=selected_measure)
+    # Add buttons for different pages
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown('<a href="/comparison" target="_self"><button class="nav-button">Comparison Mode Page 🔎</button></a>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<a href="/crime" target="_self"><button class="nav-button">Crimes Page 🔪</button></a>', unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('<a href="/responsiveness" target="_self"><button class="nav-button">Police Responsiveness Analysis Page 👮</button></a>', unsafe_allow_html=True)
+
+    selected_date = st.select_slider('Select Date', options=available_dates, label_visibility='collapsed',)
+    selected_measure = st.selectbox('Select Measure', options=available_measures, label_visibility='collapsed')
+    selected_measures = st.multiselect('Select Measures for line plot', options=available_measures, default=selected_measure, label_visibility='collapsed')
 
     try:
         st_map = display_map(df_PAS_Borough, selected_date, selected_measure)
@@ -216,11 +218,11 @@ def run_app():
             poly = st_map['last_active_drawing']['geometry']['coordinates']
             borough = st_map['last_active_drawing']['properties']['Borough']
             measure = st_map['last_active_drawing']['properties']['Measure']
-        
+
         display_trend_measure_borough(borough, selected_measures, df_PAS_Borough)
         display_box_ethnicity(df_=df_PAS_Borough, borough_=borough, measure_=selected_measure, date=selected_date)
-    except:
-        pass
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 # run the application 
 
@@ -241,7 +243,7 @@ st.markdown(
         text-align: center;
         font-family: 'Arial', sans-serif;
         font-weight: bold;
-        color: #4CAF50; /* Same as primaryColor */
+        color: #466157; /* Same as primaryColor */
     }
 
     /* Customizing the main content area */
@@ -261,12 +263,13 @@ st.markdown(
     /* Customizing the headers */
     .css-10trblm {
         font-family: 'Arial', sans-serif;
-        color: #4CAF50; /* Same as primaryColor */
+        color: #466157; /* Same as primaryColor */
     }
 
     /* Customizing the input widgets */
     .css-1cpxqw2 {
         font-family: 'Arial', sans-serif;
+        color: #466157; /* Same as primaryColor */
     }
 
     /* Customizing the text elements */
@@ -280,6 +283,86 @@ st.markdown(
         color: #333333; /* Same as textColor */
         text-align: center;
         padding: 1rem;
+    }
+    
+    /* Horizontal menu styling */
+    .horizontal-menu {
+        display: flex;
+        justify-content: center;
+        list-style-type: none;
+        padding: 0;
+        background-color: #FFFFFF;
+        margin-bottom: 20px;
+    }
+
+    .horizontal-menu li {
+        margin: 0 15px;
+    }
+
+    .horizontal-menu a {
+        text-decoration: none;
+        color: #466157; /* Same as primaryColor */
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .horizontal-menu a:hover {
+        text-decoration: underline;
+    }
+
+    /* Button styling */
+    .nav-button {
+        width: 100%;
+        background-color: #466157;
+        color: white;
+        padding: 10px;
+        font-size: 16px;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .nav-button:hover {
+        background-color: #3b514b;
+    }
+
+    /* Fullscreen map */
+    .full-screen {
+        height: calc(100vh - 100px); /* Full height minus some padding */
+    }
+
+    .stSelectbox [class*="css-"] {
+        color: #466157; /* Same as primaryColor */
+    }
+
+    /* Select slider styling */
+    .stSelectSlider .stSlider {
+        color: #466157 !important;
+    }
+
+    .stSelectSlider .stSlider .stSlider__thumb {
+        background-color: #466157 !important;
+    }
+
+    .stSelectSlider .stSlider .stSlider__track {
+        background-color: #466157 !important;
+    }
+
+    /* Select box styling */
+    .stSelectbox [class*="css-"] {
+        color: #466157 !important;
+    }
+
+    .stSelectbox .st-bd {
+        background-color: #F5F5F5 !important;
+    }
+
+    .stSelectbox .st-bg {
+        background-color: #466157 !important;
+        color: white !important;
     }
     </style>
     """,
