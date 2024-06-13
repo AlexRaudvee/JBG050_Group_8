@@ -51,8 +51,8 @@ The data can be loaded via [this link](https://data.police.uk/data/) chose the p
 1. Download this repository or clone
 2. Create environment 
 3. Load the retirements by using ```pip install -r requirements```
-4. Add the `data` folder in your working directory
-5. Run the `exploration.py` file
+4. Run the `DARALOADER.py` 
+5. Type the `streamlit run app/home.py` in cmd and press ENTER
 
 
 [docs/metropolitain_photo.jpeg]: docs/metropolitain_photo.jpg
