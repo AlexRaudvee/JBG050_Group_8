@@ -11,38 +11,22 @@ parent = os.path.dirname(current)
 sys.path.append(parent) 
 
 # config imports 
-from config import questions_dict
+from config import questions_dict, weighted_questions, weights
 
-# Define the weights for each category
-weights = {
-    'Strongly disagree': 0,
-    'Disagree': 0.25,
-    'Neither agree nor disagree': 0.5,
-    'Agree': 0.75,
-    'Strongly agree': 1,
-    'Not at all worried': 0.1,
-    'Not very worried': 0.3,
-    'Fairly worried': 0.6,
-    'Very worried': 0.9,
-    'Poor': 0.2,
-    'Fair': 0.4,
-    'Good': 0.6,
-    'Excellent': 0.8,
-    'Very poor': 0.1,
-    'Tend to agree': 0.6,
-    'Strongly agree': 1,
-    'Neither agree nor disagree': 0.5,
-    'Tend to disagree': 0.4,
-    'Fairly confident': 0.6,
-    'Very confident': 0.8,
-    'Not very confident': 0.3,
-    'Not at all confident': 0.1,
-    'Major problem': 0.8,
-    'Minor problem': 0.5,
-    'Not a problem at all': 0.2
-}
 
-weighted_questions = {'NNQ135A', 'NPQ135A', 'ReNQ147'}
+
+### FUNCTIONS ###
+
+# Function to extract the month and year
+def convert_date_format(date_str):
+    # Split the string by parentheses and extract the part containing the month and year
+    month_year_str = date_str.split('(')[1].split(')')[0]
+    # Parse the month and year and format it as 'YYYY-MM'
+    return datetime.strptime(month_year_str, '%b %Y').strftime('%Y-%m')
+
+
+
+### LOADING AND PREPROCESSING ###
 
 # Define the path to the CSV file
 csv_file_path = r'data/PAS_data_ward_level/PAS_ward_level_FY_20_21.csv'
@@ -53,19 +37,13 @@ borough_column = 'Borough' if csv_file_path[-9:-4] == '20_21' else 'BOROUGHNEIGH
 # Read the CSV file
 df = pd.read_csv(csv_file_path)
 
-# Function to extract the month and year
-def convert_date_format(date_str):
-    # Split the string by parentheses and extract the part containing the month and year
-    month_year_str = date_str.split('(')[1].split(')')[0]
-    # Parse the month and year and format it as 'YYYY-MM'
-    return datetime.strptime(month_year_str, '%b %Y').strftime('%Y-%m')
-
 # Apply the function to the MONTH column
 df['MONTH'] = df['MONTH'].apply(convert_date_format)
 
 # Group the DataFrame by the "Borough" column
 grouped_df = df.groupby([borough_column, "MONTH"])
 
+    
 # Create a new DataFrame to store the results
 results_df = pd.DataFrame(columns=['Date', 'Borough', 'Measure', 'Total Proportion', 'White_British_Proportion', 'White_Other_Proportion', 'Black_Proportion', 'Asian_Proportion', 'Mixed_Proportion', 'Other_Proportion'])
 
@@ -75,15 +53,23 @@ for question in questions_dict.keys():
         date = month
         measure = question
         borough = borough
+
         try:
             # Calculate the total proportion
-            if question in weighted_questions:
-                value_counts = group_df[question].value_counts(normalize=True)
-                total_proportion = sum(value_counts[category] * weights.get(category, 0) for category in value_counts.index)
+            if question not in weighted_questions:
+                value_counts = group_df[question].value_counts()
+                summ = value_counts.sum()
+
+                for ans in value_counts.keys():
+                    try:
+                        value_counts[ans] = value_counts[ans] * weights.get(ans)        
+                    except:
+                        print(value_counts)
+                        break
+                total_proportion = value_counts.sum()/ summ
             else:
-                value_counts = group_df[question].value_counts(normalize=True)
-                total_proportion = sum(value_counts[category] * weights.get(category, 0) for category in value_counts.index)
-            
+                continue
+
             # Extract the ethnic group proportions
             white_british_proportion = group_df[group_df['ReNQ147'] == 'White British'].shape[0] / group_df.shape[0]
             black_proportion = group_df[group_df['ReNQ147'] == 'Black'].shape[0] / group_df.shape[0]
@@ -107,6 +93,14 @@ for question in questions_dict.keys():
             }, ignore_index=True)
         except KeyError as e:
             print(f"given question ({question}) didn't occur in {csv_file_path[-9:-4]}")
+         
+ 
+# renaming values
+results_df.loc[results_df['Borough'] == 'Richmond Upon Thames', 'Borough'] = 'Richmond upon Thames'
+results_df.loc[results_df['Borough'] == 'Kensington & Chelsea', 'Borough'] = 'Kensington and Chelsea'
+results_df.loc[results_df['Borough'] == 'Hammersmith & Fulham', 'Borough'] = 'Hammersmith and Fulham'
+results_df.loc[results_df['Borough'] == 'Barking & Dagenham', 'Borough'] = 'Barking and Dagenham'
+results_df.loc[results_df['Borough'] == 'Westminster', 'Borough' ] = 'City of Westminster'
 
 # Print the resulting DataFrame
 results_df.to_csv('data/pas_data_ward_level/pre_final.csv')

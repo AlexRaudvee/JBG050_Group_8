@@ -98,10 +98,10 @@ weights = {
     'Neither agree nor disagree': 0.5,
     'Agree': 0.75,
     'Strongly agree': 1,
-    'Not at all worried': 0.1,
-    'Not very worried': 0.3,
-    'Fairly worried': 0.6,
-    'Very worried': 0.9,
+    'Not at all worried': 1,
+    'Not very worried': 0.6,
+    'Fairly worried': 0.3,
+    'Very worried': 0.1,
     'Poor': 0.2,
     'Fair': 0.4,
     'Good': 0.6,
@@ -117,7 +117,10 @@ weights = {
     'Not at all confident': 0.1,
     'Major problem': 0.8,
     'Minor problem': 0.5,
-    'Not a problem at all': 0.2
+    'Not a problem at all': 0.2,
+    'Fairly well informed': 1,
+    'Not at all informed': 0.5,
+    'Very well informed': 0,
 }
 
 weighted_questions = {'NNQ135A', 'NPQ135A', 'ReNQ147'}

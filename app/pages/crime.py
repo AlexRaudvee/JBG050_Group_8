@@ -1,10 +1,13 @@
 # imports 
 import os
 import sys
+
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 import plotly.io as pio
+import plotly.express as px
+
+from streamlit_folium import st_folium
 
 # Ensure the correct renderer is used for Streamlit
 pio.renderers.default = "iframe"
@@ -15,87 +18,69 @@ parent = os.path.dirname(current)
 sys.path.append(parent) 
 
 # custom imports 
-from functions.api_func import *
-from app.home import df_PAS_Borough
+from app.app_func import display_map_crimepage, plot_barchart
+from app.app_data_preprocessor import CRIMEPAGE_data, preprocess_neighbourhoods 
+
+st.set_page_config(
+    layout='wide',
+    initial_sidebar_state='collapsed'
+)
 
 
-# DEFINE FUNCTIONS
 
-def plot_crime_map(df: pd.DataFrame, sample_size=10000):
-    # Sample the data if it's too large
-    if len(df) > sample_size:
-        df = df.sample(sample_size)
-    
-    fig = px.scatter_mapbox(
-        df, lat="Latitude", lon="Longitude", color="Crime type", hover_name="Location",
-        hover_data=["Crime type", "Last outcome category", "Month"], zoom=10, height=600,
-        title="Crime locations in London"
-    )
-    fig.update_layout(mapbox_style="open-street-map")
-    st.plotly_chart(fig, use_container_width=True)
+### RUN THE APPLICATION ### 
 
-def plot_barchart(df: pd.DataFrame, locat: str):
-    fig = px.bar(df.groupby(by='Crime type').count().reset_index()[['Crime type','Month']].rename({'Month':'count'}, axis=1).sort_values(by='count', ascending=False), x='Crime type', y='count', title=f'Crimes in {locat}')
-    st.plotly_chart(fig, use_container_width=True)
-
-# RUN THE APPLICATION
+neighbourhoods = preprocess_neighbourhoods()
+df_PAS_Crime, df_MET_Crime, df_PAS_Borough_Trust = CRIMEPAGE_data()
 
 st.title("Crime Data in London")
 
-# Define available dates and measures 
-available_dates = df_PAS_Borough['Date'].unique()
-available_measures = df_PAS_Borough['Measure'].unique()
-
 # Slider for selecting date and selectbox for selecting the measure
+available_dates = df_PAS_Borough_Trust['Date'].unique()
 selected_date = st.sidebar.select_slider('Select Date', options=available_dates)
-selected_measure = st.sidebar.selectbox('Select Measure', options=available_measures)
 
-# Load all crime data files
-data_dir = 'data/met_data'
+# Display the map with all crimes
+st_map = display_map_crimepage(df=df_PAS_Borough_Trust, date=selected_date, measure='Trust MPS', neighbourhoods_=neighbourhoods)
 
-# Check if the directory exists
-if not os.path.exists(data_dir):
-    st.error(f"Data directory '{data_dir}' does not exist.")
-else:
-    all_files = []
-    for root, dirs, files in os.walk(data_dir):
-        for file in files:
-            if file.endswith('-metropolitan-street.csv'):
-                all_files.append(os.path.join(root, file))
+# read the callback from map and return them
+neighbourhood = ''
+poly = ''
+if st_map['last_active_drawing']:
+    borough = st_map['last_active_drawing']['properties']['Borough']
 
-    # Check if there are any files to read
-    if not all_files:
-        st.error(f"No CSV files found in the directory '{data_dir}'.")
-    else:
-        df_list = [pd.read_csv(file) for file in all_files]
+    df_MET_Crime = df_MET_Crime[(df_MET_Crime['LSOA name'].str.contains(borough, na=False)) & (df_MET_Crime['Month'] == selected_date)].reset_index()
+    df_PAS_Crime = df_PAS_Crime[(df_PAS_Crime['Borough'] == borough) & (df_PAS_Crime['Date'] == selected_date)].reset_index()
 
-        # Check if there are any DataFrames to concatenate
-        if not df_list:
-            st.error("No dataframes to concatenate.")
-        else:
-            # Combine all dataframes into one
-            df_all_years = pd.concat(df_list, ignore_index=True)
+    # Convert the dictionary into a DataFrame
+    try:
+        data = eval(df_PAS_Crime['Crime type'].loc[0])
+        # Extracting keys and values from the dictionary
+        df = pd.DataFrame(list(data.items()), columns=['Category', 'Count'])
 
-            # Display the map with all crimes
-            plot_crime_map(df=df_all_years)
+        # Creating a bar chart using Plotly Express
+        fig = px.bar(df, x='Category', y='Count', orientation='v', title=f'In {borough} People Are Afraid of:', 
+                    labels={'Count': 'Counts', 'Category': 'Categories'})
+        
+        # Update the layout to increase the title text size
+        fig.update_layout(
+            title={
+                'text': f'In {borough} People Are Afraid of:',
+                'font': {
+                    'size': 24  # Set the title font size
+                }
+            }
+        )
 
-            # Optionally, display some statistics or other visualizations
-            st.header("Crime Statistics")
-            crime_counts = df_all_years['Crime type'].value_counts().reset_index()
-            crime_counts.columns = ['Crime type', 'Count']
-            st.dataframe(crime_counts)
+        # Display the bar chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+    except:
+        st.warning('There is no PAS data for this time period, but there is Crime data from MET for this period')
 
-            # Plot a bar chart of crime counts
-            fig = px.bar(crime_counts, x='Crime type', y='Count', title='Total Crime Counts by Type')
-            st.plotly_chart(fig, use_container_width=True)
+    plot_barchart(df_MET_Crime, borough)
+
+
 
 ### AESTHETIC MODS ####
-st.set_page_config(
-    page_title="Crime Data in London",
-    layout="wide",
-    initial_sidebar_state="collapsed",  # Collapse the sidebar
-    page_icon='🔪'
-)
 
 # Apply custom CSS for improved aesthetics
 st.markdown(

@@ -18,9 +18,12 @@ sys.path.append(parent)
 
 # custom imports
 from config import questions_dict
-from functions.api_func import download_file, proportion_to_color
+from functions.api_func import download_file
+from app.app_data_preprocessor import preprocess_neighbourhoods
 
 # LOAD THE DATA
+
+neighbourhoods = preprocess_neighbourhoods()
 
 # we run the preprocessor such to have needed csv
 if not os.path.exists('data/pas_data_ward_level/pre_final.csv'):
@@ -80,21 +83,12 @@ df_PAS_Borough = df_PAS_Borough.loc[:, ~df_PAS_Borough.columns.str.contains('^Un
 df_PAS_Borough['Borough'] = df_PAS_Borough['Borough'].apply(lambda x: 'Westminster' if x == 'City of Westminster' else x)
 df_PAS_Borough['Total Proportion'] = df_PAS_Borough['Total Proportion'].round(2)
 
-# renaming values
-df_PAS_Borough.loc[df_PAS_Borough['Borough'] == 'Richmond Upon Thames', 'Borough'] = 'Richmond upon Thames'
-df_PAS_Borough.loc[df_PAS_Borough['Borough'] == 'Kensington & Chelsea', 'Borough'] = 'Kensington and Chelsea'
-df_PAS_Borough.loc[df_PAS_Borough['Borough'] == 'Hammersmith & Fulham', 'Borough'] = 'Hammersmith and Fulham'
-df_PAS_Borough.loc[df_PAS_Borough['Borough'] == 'Barking & Dagenham', 'Borough'] = 'Barking and Dagenham'
-
 # decode the question number in to category: 
 # Map the question names to their short descriptions
 question_descriptions = {key: value[1] for key, value in questions_dict.items()}
 
 # Rename the 'Measure' column in results_df using the question descriptions
 df_PAS_Borough['Measure'] = df_PAS_Borough['Measure'].map(question_descriptions)
-
-# load the neighbourhoods data 
-neighbourhoods = gpd.read_file('data/neighbourhoods_boundary.geojson')
 
 
 # DEFINE THE FUNCTIONS 
