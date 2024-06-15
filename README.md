@@ -31,20 +31,36 @@ Join us in the pursuit of building safer, more trusting communities through the 
 
 
 
-## Data (dev)
+## Data 
 
-The data can be loaded via [this link](https://data.police.uk/data/) chose the period for which you are going to download the data (for developers)
+The PAS data can be loaded via [this link](https://data.police.uk/data/) chose the period for which you are going to download the data (for developers)
 
 ## Files (dev)
-
-1. `Data_Exploration` Folder 
+1. `.streamlit` - file with configurations for our framework
+2. `.vscode` - file with configurations for working through VScode, used only during development of the code
+3. `app`Folder
+    - `iframe_figures` - folder with images for application
+    - `pages` - folder which contains all pages (comparison, crime, recommendations and responsiveness page)
+    - `app_data_preprocessors.py` - this file contains all preprocessors for data which is used in our application
+    - `app_func.py` - this file contains all high level functions that we use in our application
+    - `home.py` - this is the scrip file which contains the code of the home page of our application
+4. `artifacts` - folder with visualizations used during the data exploration
+5. `data` Folder - contains all the data files which used during the functioning of the framework.
+6. `Data_Exploration` Folder 
 
     - `exploration.py` - file in which we provide the first step to data exploration
     - `api_.ipynb` - file in which we do the extraction of data from api. (dev file)
-
-2. `config.py` - file with configurations that should be changed in your environment. 
-3. `.gitignore` - files which are going to be ignored during your push actions
-4. `LICENSE` - license of the project (dev) just in case
+    - `Demographics_exploration.ipynb` - file with the dev code for application pages
+    - `PASeda.ipynb` - file with code for exploration of the PAS data
+    - `Practicing1.ipynb` - file with the dev code for our application
+7. `data_preprocessors` Folder - files in this folder are going to run during the first run of the application
+8. `docs` Folder - this folder contains all the documents for GitHub repository (like images)
+9. `functions` - this folder contains the files with low level functions that we use in our project.
+10. `data_loader.py` - this file should be run during the first launch of the application.
+11. `config.py` - file with configurations that should be changed in your environment. 
+12. `.gitignore` - files which are going to be ignored during your push actions
+13. `LICENSE` - license of the project (dev) just in case
+14. `requirements.txt` - this file contains all requirements that you will need to run this application. 
 
 ## How to Run
 
