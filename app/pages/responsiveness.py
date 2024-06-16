@@ -8,10 +8,11 @@ import plotly.graph_objects as go
 from scipy.stats import linregress
 from plotly.subplots import make_subplots
 
-# Set Streamlit page configuration
-st.set_page_config(layout="wide", page_title='Responsiveness UK', page_icon='🕵️‍♂️')
-
 # Custom CSS for matching the presentation style
+st.set_page_config(
+    layout='wide',
+    initial_sidebar_state='expanded'
+)
 st.markdown(
     """
     <style>
@@ -85,10 +86,8 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 # custom imports
-try:
-    from app.home import df_PAS_Borough, df_PAS_MPS
-except ImportError:
-    st.error("Failed to import custom modules. Please check the import paths.")
+from app.app_data_preprocessor import RESPPONSIVNESSPAGE_data
+
 
 # DEFINE FUNCTIONS
 
@@ -184,10 +183,18 @@ def create_multi_axis_plot(df):
 
     return fig
 
+
+
+### LOAD THE DATA
+
+df_PAS_MPS, df_PAS_Borough, question_descriptions = RESPPONSIVNESSPAGE_data()
+
+
+
 # Filter data for relevant measures
 relevant_measures = ["Listen to concerns", "Relied on to be there", "Understand issues", "Trust MPS"]
-df_relevant_mps = df_PAS_MPS[df_PAS_MPS['Measure'].isin(relevant_measures)]
-df_relevant_borough = df_PAS_Borough[df_PAS_Borough['Measure'].isin(relevant_measures)]
+df_relevant_mps = df_PAS_MPS
+df_relevant_borough = df_PAS_Borough
 
 # Use the correct column names for pivot table
 pivot_column_mps = 'Proportion'
@@ -211,6 +218,7 @@ correlation_borough = df_borough_pivot[numeric_columns_borough].corr()
 scatter_plot_data = df_mps_pivot.dropna(subset=["Trust MPS"])
 
 selected_measure = st.selectbox('Select Measure', options=["Listen to concerns", "Relied on to be there", "Understand issues"])
+
 
 # Create layout for scatter plot and multi-axis plot
 st.header(f"Scatter plot for Trust MPS vs {selected_measure}", anchor=None)

@@ -242,3 +242,31 @@ def RECOMMENDATIONPAGE_data():
     df_PAS_Borough_Trust['Date'] = df_PAS_Borough_Trust['Date'].apply(lambda date_str: date_str[:7])
 
     return csv_files, borough_column_mapping, ethnic_group_column_mapping, questions, df_PAS_Borough_Trust
+
+
+
+def RESPPONSIVNESSPAGE_data():
+    
+    # now read this files for future use in visualization
+    df_PAS_MPS = pd.read_csv(f'{PATH_TO_PAS}_MPS.csv')
+    df_PAS_Borough = pd.read_csv(f'data/pas_data_ward_level/pre_final.csv')
+
+    # exclude the questions about the perceived crime and ethnic leaning
+    df_PAS_Borough = df_PAS_Borough[~df_PAS_Borough['Measure'].isin(['NNQ135A', 'NPQ135A', 'ReNQ147'])]
+
+    # Preprocess the data fro MPS
+    df_PAS_MPS['Date'] = df_PAS_MPS['Date'].apply(lambda x: x[:4])
+
+    # Preprocess the data for Borough
+    df_PAS_Borough['Total Proportion'] = df_PAS_Borough['Total Proportion'].astype(float)
+    df_PAS_Borough = df_PAS_Borough.loc[:, ~df_PAS_Borough.columns.str.contains('^Unnamed')]
+    df_PAS_Borough['Total Proportion'] = df_PAS_Borough['Total Proportion'].round(2)
+
+    # decode the question number in to category: 
+    # Map the question names to their short descriptions
+    question_descriptions = {key: value[1] for key, value in questions_dict.items()}
+
+    # Rename the 'Measure' column in results_df using the question descriptions
+    df_PAS_Borough['Measure'] = df_PAS_Borough['Measure'].map(question_descriptions)
+
+    return df_PAS_MPS, df_PAS_Borough, question_descriptions
