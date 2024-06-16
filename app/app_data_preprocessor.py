@@ -54,7 +54,7 @@ def preprocess_neighbourhoods():
     neighbourhoods = gpd.read_file(geojson_path)
     
     # Preprocess neighbourhoods data
-    neighbourhoods.loc[neighbourhoods['borough'] == 'Westminster', 'borough'] = 'City of Westminster'
+    neighbourhoods['borough'] = neighbourhoods['borough'].apply(lambda x: 'Westminster' if x == 'City of Westminster' else x)
     
     return neighbourhoods
 

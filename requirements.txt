@@ -75,7 +75,7 @@ networkx==3.3
 numpy==1.26.4
 openpyxl==3.1.2
 packaging==24.0
-pandas==1.4.0
+pandas==1.2.4
 parso==0.8.4
 patsy==0.5.6
 pexpect==4.9.0
@@ -101,6 +101,7 @@ PySocks==1.7.1
 pystac==1.10.1
 pystac-client==0.7.7
 python-box==7.1.1
+python-calamine==0.2.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
 pyzmq==26.0.2
@@ -143,5 +144,6 @@ Werkzeug==3.0.3
 whitebox==2.3.1
 whiteboxgui==2.3.0
 widgetsnbextension==4.0.10
+xlrd==2.0.1
 xyzservices==2024.4.0
 zipp==3.18.1

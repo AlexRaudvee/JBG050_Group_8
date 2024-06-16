@@ -33,7 +33,7 @@ Join us in the pursuit of building safer, more trusting communities through the 
 
 ## Data 
 
-The PAS data can be loaded via [this link](https://data.police.uk/data/) chose the period for which you are going to download the data (for developers)
+The PAS data can be loaded via [this link](https://www.dropbox.com/scl/fi/uvjzubkwblibf08qgfkm9/PAS_data_dictionaries_shared.zip?rlkey=96509v3r4zhiqir8ngi5ig7je&e=1&dl=0) 
 
 ## Files (dev)
 1. `.streamlit` - file with configurations for our framework
@@ -67,8 +67,12 @@ The PAS data can be loaded via [this link](https://data.police.uk/data/) chose t
 1. Download this repository or clone
 2. Create environment 
 3. Load the retirements by using ```pip install -r requirements```
-4. Run the `DARALOADER.py` 
-5. Type the `streamlit run app/home.py` in cmd and press ENTER
-
+4. Create a `pas_data_ward_level` folder inside the `data` folder
+5. Add PAS files in `pas_data_ward_level` in `data` folder, this files should be avaliable for you via [dropbox](https://www.dropbox.com/scl/fi/uvjzubkwblibf08qgfkm9/PAS_data_dictionaries_shared.zip?rlkey=96509v3r4zhiqir8ngi5ig7je&e=1&dl=0) which was set to groups.
+6. Now you can run the dataloader, `DATALOADER_stage_1` and `DATALOADER_stage_2`, if you experience any experiences with `DATALOADER_stage_2`, just delete the file `PAS_T%26Cdashboard_to%20Q3%2023-24.xlsx` in `data` folder, and run again, if doesn't help, download given file manually [here](https://data.london.gov.uk/dataset/mopac-surveys). If you still have an error, we recomend you to run the files in the data_preprocessors manually one by one, in this way everything should work!
+7. Then copy this to your current terminal of virtual environment and paste this into your terminal: `cd .venv/lib/python3.10/site-packages/streamlit/elements/` (assume that you use MACOS, if not, correct this line a bit)
+8. Then run this command in your terminal: `sed -i '' 's/from altair.vegalite.v4.api import Chart/from altair.vegalite.v5.api import Chart/' arrow_altair.py`. Now you are ready to run the app
+9. Type the `streamlit run app/home.py` in cmd and press ENTER
+10. The first launch can take a bit more time due to the fact that application is going to load even more files during the run and prepare them and save them.
 
 [docs/metropolitain_photo.jpeg]: docs/metropolitain_photo.jpg
