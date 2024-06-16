@@ -164,6 +164,11 @@ data/PAS_T%26Cdashboard_to%20Q3%2023-24_Borough.csv
 data/PAS_T%26Cdashboard_to%20Q3%2023-24_MPS.csv
 data/public-perception-data.csv
 data/met_data
-data/pas_data_ward_level
-data/PAS_data_dictionaries_shared
+data/pas_data_ward_level/PAS_ward_level_FY_15_17.csv
+data/pas_data_ward_level/PAS_ward_level_FY_17_18.csv
+data/pas_data_ward_level/PAS_ward_level_FY_18_19.csv
+data/pas_data_ward_level/PAS_ward_level_FY_19_20.csv
+data/pas_data_ward_level/PAS_ward_level_FY_20_21.csv
+data/pas_data_ward_level/PAS_crime.csv
+data/pas_data_ward_level/pre_final.csv
 artifacts/
