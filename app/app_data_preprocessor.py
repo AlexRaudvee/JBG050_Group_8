@@ -110,6 +110,7 @@ def CRIMEPAGE_data():
     df_PAS_Borough_Trust.loc[df_PAS_Borough_Trust['Borough'] == 'Kensington & Chelsea', 'Borough'] = 'Kensington and Chelsea'
     df_PAS_Borough_Trust.loc[df_PAS_Borough_Trust['Borough'] == 'Hammersmith & Fulham', 'Borough'] = 'Hammersmith and Fulham'
     df_PAS_Borough_Trust.loc[df_PAS_Borough_Trust['Borough'] == 'Barking & Dagenham', 'Borough'] = 'Barking and Dagenham'
+    df_PAS_Borough_Trust['Borough'] = df_PAS_Borough_Trust['Borough'].apply(lambda x: 'Westminster' if x == 'City of Westminster' else x)
 
     # Apply the conversion function to the Date column
     df_PAS_Borough_Trust['Date'] = df_PAS_Borough_Trust['Date'].apply(lambda date_str: date_str[:7])
