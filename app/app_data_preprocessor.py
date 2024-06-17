@@ -78,6 +78,7 @@ def HOMEPAGE_data():
     df_PAS_Borough['Total Proportion'] = df_PAS_Borough['Total Proportion'].astype(float)
     df_PAS_Borough = df_PAS_Borough.loc[:, ~df_PAS_Borough.columns.str.contains('^Unnamed')]
     df_PAS_Borough['Total Proportion'] = df_PAS_Borough['Total Proportion'].round(2)
+    df_PAS_Borough['Borough'] = df_PAS_Borough['Borough'].apply(lambda x: 'Westminster' if x == 'City of Westminster' else x)
 
     # decode the question number in to category: 
     # Map the question names to their short descriptions
