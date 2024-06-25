@@ -72,7 +72,8 @@ The PAS data can be loaded via [this link](https://www.dropbox.com/scl/fi/uvjzub
 6. Now you can run the dataloader, `DATALOADER_stage_1` and `DATALOADER_stage_2`, if you experience any experiences with `DATALOADER_stage_2`, just delete the file `PAS_T%26Cdashboard_to%20Q3%2023-24.xlsx` in `data` folder, and run again, if doesn't help, download given file manually [here](https://data.london.gov.uk/dataset/mopac-surveys). If you still have an error, we recomend you to run the files in the data_preprocessors manually one by one, in this way everything should work!
 7. Then copy this to your current terminal of virtual environment and paste this into your terminal: `cd .venv/lib/python3.10/site-packages/streamlit/elements/` (assume that you use MACOS, if not, correct this line a bit)
 8. Then run this command in your terminal: `sed -i '' 's/from altair.vegalite.v4.api import Chart/from altair.vegalite.v5.api import Chart/' arrow_altair.py`. Now you are ready to run the app
-9. Type the `streamlit run app/home.py` in cmd and press ENTER
+9.1. Then resturt your terminal such taht you come back to original path
+9.2. Type the `streamlit run app/home.py` in cmd and press ENTER
 10. The first launch can take a bit more time due to the fact that application is going to load even more files during the run and prepare them and save them.
 
 [docs/metropolitain_photo.jpeg]: docs/metropolitain_photo.jpg
